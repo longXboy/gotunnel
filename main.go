@@ -22,8 +22,8 @@ var (
 	HOST        = flag.String("host", "", "ssh server hostname")
 	PORT        = flag.Int("port", 22, "ssh server port")
 	PROXY_ADDR  = flag.String("proxy_addr", "0:8888", "local http proxy address")
-	LOCAL_ADDR  = flag.String("local_addr", "127.0.0.1:9999", "local provider listening address")
-	REMOTE_ADDR = flag.String("remote_addr", "0:9999", "remote provider listening address")
+	LOCAL_ADDR  = flag.String("local_addr", "127.0.0.1:18083", "local provider listening address")
+	REMOTE_ADDR = flag.String("remote_addr", "0:18083", "remote provider listening address")
 	PASS        = flag.String("pass", "", "ssh password")
 	KEY         = flag.String("key", os.Getenv("HOME")+"/.ssh/id_rsa", "ssh key file path")
 )
@@ -35,6 +35,7 @@ type Dialer interface {
 }
 
 func main() {
+	log.SetOutput(os.Stdout)
 	if *HOST == "" {
 		log.Fatalf("must provide remote ssh host!")
 	}
@@ -71,7 +72,7 @@ func main() {
 	go ListenRemote(conn)
 	prxy := goproxy.NewProxyHttpServer()
 	prxy.Tr = &http.Transport{Dial: conn.Dial}
-	log.Printf("listening for local HTTP connections on [%s]\n", *PROXY_ADDR)
+	log.Printf("listening for local HTTP PROXY connections on [%s]\n", *PROXY_ADDR)
 	log.Println(http.ListenAndServe(*PROXY_ADDR, prxy))
 	log.Println("shutting down")
 }
@@ -101,7 +102,6 @@ func serveTcp(conn net.Conn) {
 		log.Printf("dial local addr %v failed!err:=%v", *LOCAL_ADDR, err)
 		return
 	}
-	fmt.Println("create conn to addr", *LOCAL_ADDR)
 	defer localConn.Close()
 	ch := make(chan struct{}, 0)
 	go func() {

@@ -12,6 +12,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/elazarl/goproxy"
 	"golang.org/x/crypto/ssh"
@@ -21,9 +22,9 @@ var (
 	USER        = flag.String("user", "root", "ssh username")
 	HOST        = flag.String("host", "", "ssh server hostname")
 	PORT        = flag.Int("port", 22, "ssh server port")
-	PROXY_ADDR  = flag.String("proxy_addr", "0:8888", "local http proxy address")
+	PROXY_ADDR  = flag.String("proxy_addr", "0.0.0.0:8888", "local http proxy address")
 	LOCAL_ADDR  = flag.String("local_addr", "127.0.0.1:18083", "local provider listening address")
-	REMOTE_ADDR = flag.String("remote_addr", "0:18083", "remote provider listening address")
+	REMOTE_ADDR = flag.String("remote_addr", "0.0.0.0:18083", "remote provider listening address")
 	PASS        = flag.String("pass", "", "ssh password")
 	KEY         = flag.String("key", os.Getenv("HOME")+"/.ssh/id_rsa", "ssh key file path")
 )
@@ -62,6 +63,7 @@ func main() {
 		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
 			return nil
 		},
+		Timeout: 6 * time.Second,
 	}
 	addr := fmt.Sprintf("%s:%d", *HOST, *PORT)
 	conn, err := ssh.Dial("tcp", addr, config)

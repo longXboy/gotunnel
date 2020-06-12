@@ -44,7 +44,7 @@ func main() {
 	if *PASS != "" {
 		auths = append(auths, ssh.Password(*PASS))
 	}
-	if *KEY != "" {
+	if *PASS == "" && *KEY != "" {
 		key, err := ioutil.ReadFile(*KEY)
 		if err != nil {
 			log.Fatalf("unable to read private key: %v", err)
